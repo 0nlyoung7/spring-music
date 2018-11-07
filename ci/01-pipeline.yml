@@ -13,7 +13,7 @@ resources:
 - name: music-repo
   type: git
   source:
-    uri: https://github.com/akirasoft/spring-music.git
+    uri: https://github.com/0nlyoung7/spring-music.git
     branch: master
     username: ((github-username))
     password: ((github-password))
@@ -22,18 +22,18 @@ resources:
   type: semver
   source:
     bucket: ((s3-bucket-name))
-    region_name: us-west-2
-    key: workshop99/current-version
+    region_name: ap-northeast-2
+    key: workshop02/current-version
     access_key_id: ((s3-access-key-id))
     secret_access_key: ((s3-secret-access-key))
-    initial_version: 1.0.0
+    initial_version: 1.1.0
 
 - name: music-release
   type: s3
   source:
     bucket: ((s3-bucket-name))
-    region_name: us-west-2
-    regexp: workshop99/spring-music-(.*).jar
+    region_name: ap-northeast-2
+    regexp: workshop02/spring-music-(.*).jar
     access_key_id: ((s3-access-key-id))
     secret_access_key: ((s3-secret-access-key))
 
@@ -58,7 +58,7 @@ resources:
     skip_cert_check: true
     space: ((pcf-prod-space))
     current_app_name: ((pcf-prod-app-suffix))
-    
+
 jobs:
 - name: unit
   plan:
@@ -94,7 +94,7 @@ jobs:
   plan:
   - get: music-repo
     trigger: true
-    passed: 
+    passed:
       - build-binary
   - get: version
   - get: music-release
@@ -111,7 +111,7 @@ jobs:
 - name: load-tests
   serial: true
   public: true
-  plan:    
+  plan:
   - get: music-repo
     trigger: true
     passed:
@@ -125,13 +125,13 @@ jobs:
 - name: push-to-prod
   serial: true
   public: true
-  plan:  
+  plan:
   - get: music-repo
     trigger: false
     passed:
       - load-tests
   - get: version
-  - get: music-release 
+  - get: music-release
   - task: get-current-app-color
     file: music-repo/ci/tasks/current-app-get-info.yml
     params:
@@ -140,13 +140,13 @@ jobs:
       PCF_ORG: ((pcf-prod-organization))
       PCF_USER: ((prod-deploy-username))
       PCF_PWD: ((prod-deploy-password))
-      PCF_SPACE: ((pcf-prod-space))  
+      PCF_SPACE: ((pcf-prod-space))
   - task: prepare-app-manifest
     file: music-repo/ci/tasks/app-manifest-prep.yml
     params:
       PCF_APP_SUFFIX: ((pcf-prod-app-suffix))
-      WORKSHOPNUM: ((workshopnum))      
-      PRODUCTION: true  
+      WORKSHOPNUM: ((workshopnum))
+      PRODUCTION: true
   - put: PCF-Prod
     params:
       manifest: app-manifest-output/manifest.yml
@@ -161,7 +161,7 @@ jobs:
     passed:
       - push-to-prod
   - task: get-current-app-color
-    file: music-repo/ci/tasks/current-app-get-info.yml      
+    file: music-repo/ci/tasks/current-app-get-info.yml
     params:
       PCF_APP_SUFFIX: ((pcf-prod-app-suffix))
       PCF_API: ((pcf-prod-api))
@@ -174,7 +174,7 @@ jobs:
     params:
       PCF_APP_SUFFIX: ((pcf-prod-app-suffix))
       PCF_APP_DOMAIN: ((pcf-prod-app-domain))
-      PRODUCTION: true 
+      PRODUCTION: true
 
 - name: promote-new-version
   serial: true
@@ -202,5 +202,4 @@ jobs:
       PCF_ORG: ((pcf-prod-organization))
       PCF_USER: ((prod-deploy-username))
       PCF_PWD: ((prod-deploy-password))
-      PCF_SPACE: ((pcf-prod-space))      
-                 
+      PCF_SPACE: ((pcf-prod-space))

@@ -2,7 +2,7 @@ resources:
 - name: music-repo
   type: git
   source:
-    uri: git@github.com:akirasoft/spring-music.git
+    uri: git@github.com:0nlyoung7/spring-music.git
     branch: master
     private_key: ((github-access-token))
 
